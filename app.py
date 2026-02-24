@@ -3,6 +3,7 @@ from streamlit_gsheets import GSheetsConnection
 import pandas as pd
 from datetime import date, timedelta
 import plotly.express as px
+import time
 
 filter1 = 30
 filter2 = 365
@@ -95,4 +96,14 @@ with tab3:
     fig = px.line(filter3df, x='Date', y='Weight')
     st.plotly_chart(fig)
 
+with st.form("add_weight"):
+    new_date = st.date_input("Date", value=date.today())
+    new_weight = st.number_input("Weight", min_value=0.0, step=0.1)
+    submitted = st.form_submit_button("Add")
 
+    if submitted:
+        conn.update(worksheet="Sheet2", data=df._append({"Date": new_date, "Weight": new_weight}, ignore_index=True))
+        st.success("Weight added!")
+        # st.delay(2)
+        time.sleep(2)
+        st.rerun()
