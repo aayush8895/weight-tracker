@@ -1,3 +1,3 @@
-streamlit-gsheets-connection
+streamlit-gsheets-connection==0.0.5
 pandas
 plotly
