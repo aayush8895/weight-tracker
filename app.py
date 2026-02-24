@@ -59,11 +59,11 @@ with tab1:
     with col2:
         st.metric(label="Min", value=filter1df['Weight'].min(), border=True)
     
-    
+
     with col3:
         st.metric(label="Max", value=filter1df['Weight'].max(), border=True)
     fig = px.line(filter1df, x='Date', y='Weight')
-    st.plotly_chart(fig)
+    st.plotly_chart(fig) 
 
 with tab2:
     filter2df = df[(df['Date'] >=  date.today() - timedelta(days=filter2)) ]
