@@ -10,6 +10,6 @@ log_page = st.Page("views/log_weight.py", title="Log Weight", icon="⚖️")
 
 
 # # Using position="hidden" removes the sidebar navigation menu entirely
-pg = st.navigation([home_page, log_page], position="hidden")
+pg = st.navigation([home_page, log_page], position="top")
 
 pg.run()
