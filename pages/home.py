@@ -84,25 +84,26 @@ def bmi_indicator(bmi):
 # ── Tab renderer ──────────────────────────────────────────────────────────────
 def render_tab(offset_key, days, label_fmt):
     # ── Period nav ABOVE chart ──
-    offset = st.session_state[offset_key]
-    end    = date.today() - timedelta(days=days * offset)
-    start  = end - timedelta(days=days)
-
     c1, c2, c3 = st.columns([1, 4, 1])
     with c1:
         if st.button("◀", key=f"prev_{offset_key}"):
             st.session_state[offset_key] += 1
             st.rerun()
+    with c3:
+        if st.button("▶", key=f"next_{offset_key}"):
+            st.session_state[offset_key] = max(st.session_state[offset_key] - 1, 0)
+            st.rerun()
+
+    offset = st.session_state[offset_key]
+    end    = date.today() - timedelta(days=days * offset)
+    start  = end - timedelta(days=days)
+
     with c2:
         st.markdown(
             f"<div style='text-align:center;font-size:12px;color:light-dark(#6b7280,#9ca3af);padding-top:6px;'>"
             f"{start.strftime(label_fmt)} → {end.strftime(label_fmt)}</div>",
             unsafe_allow_html=True
         )
-    with c3:
-        if st.button("▶", key=f"next_{offset_key}", disabled=offset == 0):
-            st.session_state[offset_key] = max(st.session_state[offset_key] - 1, 0)
-            st.rerun()
 
     fdf      = df[(df["Date"] > start) & (df["Date"] <= end)]
     prev_fdf = df[(df["Date"] > start - timedelta(days=days)) & (df["Date"] <= start)]
@@ -197,16 +198,8 @@ hist["Change"] = hist["Change"].apply(
 st.dataframe(hist, use_container_width=True, hide_index=True)
 
 # ── Sticky Log Button ─────────────────────────────────────────────────────────
-if "go_to_log" not in st.session_state:
-    st.session_state.go_to_log = False
-
 btn = st.container()
 with btn:
     if st.button("➕ Log Weight", use_container_width=True):
-        st.session_state.go_to_log = True
-        st.rerun()
+        st.switch_page("views/log_weight.py")
 btn.float("bottom: 1.5rem; left: 50%; transform: translateX(-50%); width: 200px;")
-
-if st.session_state.go_to_log:
-    st.session_state.go_to_log = False
-    st.switch_page("views/log_weight.py")
