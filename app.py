@@ -15,11 +15,12 @@ st.markdown("""
 .stTabs [data-baseweb="tab-list"] { display: flex; width: 100%; }
 .stTabs [data-baseweb="tab"]      { flex-grow: 1; justify-content: center; text-align: center; }
 #MainMenu, footer, header          { visibility: hidden; }
+[data-testid="stColumn"]:last-child .stButton { display: flex; justify-content: flex-end; }
 </style>
 """, unsafe_allow_html=True)
 
 # ── Constants ─────────────────────────────────────────────────────────────────
-HEIGHT_M = 1.778
+HEIGHT_M = 1.79
 GOAL_KG  = 90.0
 
 # ── Session state ─────────────────────────────────────────────────────────────
@@ -92,21 +93,23 @@ def render_tab(offset_key, days, label_fmt):
     end    = date.today() - timedelta(days=days * offset)
     start  = end - timedelta(days=days)
 
-    c1, c2, c3 = st.columns([1, 4, 1])
+    c1, c2, c3 = st.columns(3, vertical_alignment="center")
     with c1:
         if st.button("◀", key=f"prev_{offset_key}"):
             st.session_state[offset_key] += 1
             st.rerun()
     with c2:
         st.markdown(
-            f"<div style='text-align:center;font-size:12px;color:light-dark(#6b7280,#9ca3af);padding-top:6px;'>"
+            f"<div style='text-align:center;font-size:12px;color:light-dark(#6b7280,#9ca3af);'>"
             f"{start.strftime(label_fmt)} → {end.strftime(label_fmt)}</div>",
             unsafe_allow_html=True
         )
     with c3:
+        st.markdown("<div style='text-align:right;'>", unsafe_allow_html=True)
         if st.button("▶", key=f"next_{offset_key}", disabled=offset == 0):
             st.session_state[offset_key] = max(st.session_state[offset_key] - 1, 0)
             st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
 
     fdf      = df[(df["Date"] > start) & (df["Date"] <= end)]
     prev_fdf = df[(df["Date"] > start - timedelta(days=days)) & (df["Date"] <= start)]
