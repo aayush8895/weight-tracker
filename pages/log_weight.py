@@ -1,58 +1,54 @@
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
+import pandas as pd
 from datetime import date
 import time
-import pandas as pd
 
-st.set_page_config(page_title="Log Weight", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Log Weight", layout="centered")
 
 st.markdown("""
 <style>
 .block-container { max-width: 480px !important; padding: 1.5rem 1rem; }
-#MainMenu, footer, header { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("## Log Weight")
+
 conn = st.connection("gsheets", type=GSheetsConnection)
-if "df" not in st.session_state:
-    st.session_state.df = conn.read(worksheet="Sheet2", ttl=10)
 
-df = st.session_state.df.copy()
-df["Weight"] = pd.to_numeric(df["Weight"], errors="coerce")
+# Read latest weight to pre-fill the field
+raw_df = conn.read(worksheet="Sheet2", ttl=0)
+raw_df["Date"]   = pd.to_datetime(raw_df["Date"], errors="coerce").dt.date
+raw_df["Weight"] = pd.to_numeric(raw_df["Weight"], errors="coerce")
+raw_df = raw_df.dropna(subset=["Date", "Weight"]).sort_values("Date").reset_index(drop=True)
 
-last_weight = df["Weight"].iloc[-1]
+latest_weight = float(raw_df["Weight"].iloc[-1]) if not raw_df.empty else 0.0
 
-st.markdown("### ⚖️ Log Your Weight")
-st.markdown(f"<div style='font-size:13px; color:gray; margin-bottom:16px;'>Last logged: <b>{last_weight} kg</b></div>",
-            unsafe_allow_html=True)
+with st.form("log_weight_form"):
+    new_date   = st.date_input("Date", value=date.today())
+    new_weight = st.number_input("Weight (kg)", min_value=0.0, step=0.1, value=latest_weight)
+    submitted  = st.form_submit_button("Save", width="stretch")
 
-log_date = st.date_input("Date", value=date.today())
-weight   = st.number_input("Weight (kg)", value=float(last_weight), min_value=0.0, step=0.1)
+if submitted:
+    df = conn.read(worksheet="Sheet2", ttl=0)
+    df["Date"]   = pd.to_datetime(df["Date"], errors="coerce").dt.date
+    df["Weight"] = pd.to_numeric(df["Weight"], errors="coerce")
 
-# Delta preview
-delta = round(weight - last_weight, 1)
-delta_color = "#ef4444" if delta > 0 else "#22c55e" if delta < 0 else "#9ca3af"
-delta_str   = f"+{delta}" if delta > 0 else str(delta)
-if delta != 0:
-    st.markdown(
-        f"<div style='font-size:13px; color:{delta_color}; margin-bottom:12px;'>{delta_str} kg from last entry</div>",
-        unsafe_allow_html=True
-    )
+    existing = df["Date"] == new_date
+    if existing.any():
+        df.loc[existing, "Weight"] = new_weight
+        msg = "Weight updated!"
+    else:
+        df = df._append({"Date": new_date, "Weight": new_weight}, ignore_index=True)
+        msg = "Weight logged!"
 
-st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+    conn.update(worksheet="Sheet2", data=df)
 
-col1, col2 = st.columns(2)
-with col1:
-    if st.button("✅ Save", use_container_width=True):
-        with st.spinner("Saving..."):
-            df["Date"] = pd.to_datetime(df["Date"], errors="coerce").dt.date
-            updated_df = df._append({"Date": log_date, "Weight": weight}, ignore_index=True)
-            conn.update(worksheet="Sheet2", data=updated_df)
-        st.success("Saved!")
-        st.session_state.df = updated_df
-        time.sleep(1)
-        st.switch_page("views/home.py")
+    if "df" in st.session_state:
+        del st.session_state["df"]
+    st.success(msg)
+    time.sleep(1)
+    st.switch_page("app.py")
 
-with col2:
-    if st.button("❌ Cancel", use_container_width=True):
-        st.switch_page("views/home.py")
+if st.button("← Back"):
+    st.switch_page("app.py")

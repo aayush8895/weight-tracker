@@ -37,6 +37,10 @@ df["Date"]   = pd.to_datetime(df["Date"], errors="coerce").dt.date
 df["Weight"] = pd.to_numeric(df["Weight"], errors="coerce")
 df = df.dropna(subset=["Date", "Weight"]).sort_values("Date").reset_index(drop=True)
 
+if df.empty:
+    st.error("No data found in the sheet.")
+    st.stop()
+
 latest_w    = df["Weight"].iloc[-1]
 latest_date = df["Date"].iloc[-1]
 
@@ -116,17 +120,18 @@ def render_tab(offset_key, days, label_fmt):
     bmi_indicator(round(period_latest / (HEIGHT_M ** 2), 1))
 
     # Metrics
-    delta     = round(period_latest - prev_fdf["Weight"].iloc[-1], 1) if not prev_fdf.empty else None
-    delta_str = (f"+{delta} kg" if delta and delta > 0 else f"{delta} kg") if delta is not None else None
+    avg_cur  = round(fdf["Weight"].mean(), 1)
+    avg_prev = round(prev_fdf["Weight"].mean(), 1) if not prev_fdf.empty else None
+    avg_delta = round(avg_cur - avg_prev, 1) if avg_prev is not None else None
+    avg_delta_str = (f"+{avg_delta}" if avg_delta is not None and avg_delta > 0 else str(avg_delta)) if avg_delta is not None else None
 
     c1, c2, c3 = st.columns(3)
     with c1:
-        st.metric("Avg", f"{round(fdf['Weight'].mean(), 1)} kg", border=True)
+        st.metric("Avg (kg)", avg_cur, delta=avg_delta_str, delta_color="inverse", border=True)
     with c2:
-        st.metric("Min", f"{fdf['Weight'].min()} kg", border=True)
+        st.metric("Min (kg)", round(fdf["Weight"].min(), 1), border=True)
     with c3:
-        st.metric("Max", f"{fdf['Weight'].max()} kg",
-                  delta=delta_str, delta_color="inverse", border=True)
+        st.metric("Max (kg)", round(fdf["Weight"].max(), 1), border=True)
 
     # Chart
     fig = px.line(fdf, x="Date", y="Weight", markers=True,
@@ -138,7 +143,7 @@ def render_tab(offset_key, days, label_fmt):
         xaxis=dict(showgrid=False),
         yaxis=dict(showgrid=True, gridcolor="rgba(128,128,128,0.15)"),
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # SECTION 1 — Header
@@ -190,11 +195,11 @@ st.markdown("---")
 st.markdown("### 📋 History")
 
 hist = df[["Date", "Weight"]].sort_values("Date", ascending=False).reset_index(drop=True)
-hist["Change"] = hist["Weight"].diff(-1).mul(-1).round(1)
+hist["Change"] = hist["Weight"].diff(-1).round(1)
 hist["Change"] = hist["Change"].apply(
     lambda x: f"+{x}" if pd.notna(x) and x > 0 else (str(x) if pd.notna(x) else "—")
 )
-st.dataframe(hist, use_container_width=True, hide_index=True)
+st.dataframe(hist, width="stretch", hide_index=True)
 
 # ── Sticky Log Button ─────────────────────────────────────────────────────────
 if "go_to_log" not in st.session_state:
@@ -202,11 +207,11 @@ if "go_to_log" not in st.session_state:
 
 btn = st.container()
 with btn:
-    if st.button("➕ Log Weight", use_container_width=True):
+    if st.button("➕ Log Weight", width="stretch"):
         st.session_state.go_to_log = True
         st.rerun()
 btn.float("bottom: 1.5rem; left: 50%; transform: translateX(-50%); width: 200px;")
 
 if st.session_state.go_to_log:
     st.session_state.go_to_log = False
-    st.switch_page("views/log_weight.py")
+    st.switch_page("pages/log_weight.py")
