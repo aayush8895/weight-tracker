@@ -17,7 +17,7 @@ st.markdown("## Log Weight")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # Read latest weight to pre-fill the field
-raw_df = conn.read(worksheet="Sheet2", ttl=0)
+raw_df = conn.read(worksheet="Sheet1", ttl=0)
 raw_df["Date"]   = pd.to_datetime(raw_df["Date"], errors="coerce").dt.date
 raw_df["Weight"] = pd.to_numeric(raw_df["Weight"], errors="coerce")
 raw_df = raw_df.dropna(subset=["Date", "Weight"]).sort_values("Date").reset_index(drop=True)
@@ -30,7 +30,7 @@ with st.form("log_weight_form"):
     submitted  = st.form_submit_button("Save", width="stretch")
 
 if submitted:
-    df = conn.read(worksheet="Sheet2", ttl=0)
+    df = conn.read(worksheet="Sheet1", ttl=0)
     df["Date"]   = pd.to_datetime(df["Date"], errors="coerce").dt.date
     df["Weight"] = pd.to_numeric(df["Weight"], errors="coerce")
 
@@ -42,7 +42,7 @@ if submitted:
         df = df._append({"Date": new_date, "Weight": new_weight}, ignore_index=True)
         msg = "Weight logged!"
 
-    conn.update(worksheet="Sheet2", data=df)
+    conn.update(worksheet="Sheet1", data=df)
 
     if "df" in st.session_state:
         del st.session_state["df"]
