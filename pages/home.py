@@ -33,7 +33,7 @@ if "df" not in st.session_state:
     st.session_state.df = conn.read(worksheet="Sheet1", ttl=10)
 
 df = st.session_state.df.copy()
-df["Date"]   = pd.to_datetime(df["Date"], errors="coerce").dt.date
+df["Date"]   = pd.to_datetime(df["Date"], errors="coerce", dayfirst=True).dt.date
 df["Weight"] = pd.to_numeric(df["Weight"], errors="coerce")
 df = df.dropna(subset=["Date", "Weight"]).sort_values("Date").reset_index(drop=True)
 
