@@ -55,7 +55,7 @@ def bmi_indicator(bmi):
     else:            cat, col = "Obese",         "#ef4444"
 
     stops_bmi = [10, 18.5, 25, 30, 40]
-    stops_pct = [0,  24,   50, 64, 100]
+    stops_pct = [0,  28,   50, 67, 100]
     pct = 0
     for i in range(len(stops_bmi) - 1):
         if stops_bmi[i] <= bmi <= stops_bmi[i+1]:
