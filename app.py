@@ -163,10 +163,10 @@ st.markdown(f"""
 # ═══════════════════════════════════════════════════════════════════════════════
 # SECTION 2 — Period tabs
 # ═══════════════════════════════════════════════════════════════════════════════
-tab1, tab2, tab3 = st.tabs(["1 Month", "1 Year", "3 Years"])
+tab1, tab2, tab3 = st.tabs(["3 Months", "1 Year", "3 Years"])
 
 with tab1:
-    render_tab("offset1", 30,      "%b %d")
+    render_tab("offset1", 90,      "%b %d")
 with tab2:
     render_tab("offset2", 365,     "%b %Y")
 with tab3:
