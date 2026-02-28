@@ -31,7 +31,7 @@ for key in ("offset1", "offset2", "offset3"):
 # ── Data ──────────────────────────────────────────────────────────────────────
 conn = st.connection("gsheets", type=GSheetsConnection)
 if "df" not in st.session_state:
-    st.session_state.df = conn.read(worksheet="Sheet2", ttl=10)
+    st.session_state.df = conn.read(worksheet="Sheet1", ttl=10)
 
 df = st.session_state.df.copy()
 df["Date"]   = pd.to_datetime(df["Date"], errors="coerce").dt.date
