@@ -54,8 +54,8 @@ def bmi_indicator(bmi):
     elif bmi < 30:   cat, col = "Overweight",   "#f97316"
     else:            cat, col = "Obese",         "#ef4444"
 
-    stops_bmi = [10, 18.5, 25, 30, 40]
-    stops_pct = [0,  28,   50, 67, 100]
+    stops_bmi = [12, 18.5, 25, 30, 40]
+    stops_pct = [0,  23,   46, 64, 100]
     pct = 0
     for i in range(len(stops_bmi) - 1):
         if stops_bmi[i] <= bmi <= stops_bmi[i+1]:
