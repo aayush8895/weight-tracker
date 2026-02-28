@@ -54,8 +54,8 @@ def bmi_indicator(bmi):
     elif bmi < 30:   cat, col = "Overweight",   "#f97316"
     else:            cat, col = "Obese",         "#ef4444"
 
-    stops_bmi = [12, 18.5, 25, 30, 40]
-    stops_pct = [0,  23,   46, 64, 100]
+    stops_bmi = [10, 18.5, 25, 30, 40]
+    stops_pct = [0,  28,   50, 67, 100]
     pct = 0
     for i in range(len(stops_bmi) - 1):
         if stops_bmi[i] <= bmi <= stops_bmi[i+1]:
@@ -70,8 +70,8 @@ def bmi_indicator(bmi):
         <div style="position:relative;height:10px;border-radius:999px;overflow:hidden;display:flex;">
             <div style="width:24%;background:#3b82f6;"></div>
             <div style="width:26%;background:#22c55e;"></div>
-            <div style="width:14%;background:#f97316;"></div>
-            <div style="width:36%;background:#ef4444;"></div>
+            <div style="width:17%;background:#f97316;"></div>
+            <div style="width:33%;background:#ef4444;"></div>
         </div>
         <div style="position:relative;height:12px;margin-top:1px;">
             <div style="position:absolute;left:{pct}%;transform:translateX(-50%);">
@@ -81,8 +81,8 @@ def bmi_indicator(bmi):
         <div style="display:flex;font-size:10px;color:light-dark(#6b7280,#9ca3af);">
             <span style="width:24%;">Underweight</span>
             <span style="width:26%;text-align:center;">Normal</span>
-            <span style="width:14%;text-align:center;">Overweight</span>
-            <span style="width:36%;text-align:right;">Obese</span>
+            <span style="width:17%;text-align:center;">Overweight</span>
+            <span style="width:33%;text-align:right;">Obese</span>
         </div>
         <div style="text-align:center;margin-top:6px;font-weight:700;color:{col};font-size:13px;">{bmi} — {cat}</div>
     </div>
